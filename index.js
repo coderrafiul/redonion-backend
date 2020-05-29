@@ -91,5 +91,42 @@ client.connect(err => {
   });
 
 })
+
+app.post('/bookAppointments', (req, res)=>{
+
+  client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+  const patientDetails= req.body;
+  patientDetails.bookingTime= new Date(); 
+  
+  client.connect(err => {
+      const collection = client.db("doctorsPortal").collection("appointments");
+      collection.insert(patientDetails, (err, result)=>{
+          if(err) { 
+              console.log(err);
+          } else {
+            console.log('Successfully booked',result);
+            res.send(result.ops[0]);
+          }
+      })
+    //   client.close();
+    });
+  
+  })
+
+  app.get('/appointments', (req, res)=>{
+    client = new MongoClient(uri, { useNewUrlParser: true});
+    client.connect(err => {
+        const collection = client.db("doctorsPortal").collection("appointments");
+        collection.find().toArray((err, document)=>{
+            if(err) { 
+                console.log(err);
+            } else {
+              
+              res.send(document);
+            }
+        })
+        client.close();
+      });
+})
 const port= process.env.PORT || 4300
 app.listen(port, (err)=>{console.log('Listening to port', port);});
